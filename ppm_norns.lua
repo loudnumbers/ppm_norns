@@ -26,6 +26,7 @@
 -- range on all four channels.
 --
 engine.name = "TestSine"
+local graph = include("lib/lightergraph")
 local json = include("lib/json")
 -- https://github.com/rxi/json.lua
 
@@ -36,7 +37,11 @@ local C0 = 16.35
 local C4 = 261.63
 local api = "https://global-warming.org/api/co2-api"
 local backup = "data.json"
+
+-- Variables
 local data
+local dataset = {}
+local graph
 
 -- On startup
 function init()
@@ -58,6 +63,9 @@ end
 function redraw()
     -- clear the screen
     screen.clear()
+
+    -- graph
+    graph.redraw()
 
     -- text
     screen.aa(1)
@@ -84,10 +92,27 @@ end
 
 -- Function to run after data is downloaded
 function process(download)
+
+    -- Fill out the dataset
+    for i = 1, #json.decode(download).co2 do
+        table.insert(dataset, json.decode(download).co2[i].cycle)
+    end
+
+    print(dataset)
+
+    -- Make the graph
+    graph.new(1, #dataset, "lin", preindustrial, threshold, "lin",
+              "line_and_point", false, false)
+    graph:set_position_and_size(8, 22, 49, 36)
+    for i = 1, #dataset do graph:add_point(i, dataset[i]) end
+
+    -- Latest datapoint
     data = json.decode(download).co2[#json.decode(download).co2]
     print(
         "The data " .. data.cycle .. " was gathered on " .. data.year .. "-" ..
             data.month .. "-" .. data.day)
+
+    -- Use the data
     engine.hz(map(data.cycle, preindustrial, threshold, C0, C4))
     local volts = map(data.cycle, preindustrial, threshold, 0, 10)
     for i = 1, 4 do crow.output[i].volts = volts end
