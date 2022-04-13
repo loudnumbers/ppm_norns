@@ -51,6 +51,33 @@ function init()
     process(dl)
 end
 
+function redraw()
+    -- clear the screen
+    screen.clear()
+
+    -- text
+    screen.aa(1)
+
+    -- root note
+    screen.font_size(65)
+    screen.font_face(19)
+    screen.level(2)
+
+    screen.move(2, 56)
+    screen.text(data.cycle .. " ppm")
+
+    -- scale
+    screen.font_size(10)
+    screen.font_face(4)
+    screen.level(15)
+
+    screen.move(124, 60)
+    screen.text_right(data.year .. "-" .. data.month .. "-" .. data.day)
+
+    -- trigger a screen update
+    screen.update()
+end
+
 -- Function to run after data is downloaded
 function process(download)
     local data = json.decode(download).co2[#json.decode(download).co2]
@@ -58,6 +85,8 @@ function process(download)
         "The data " .. data.cycle .. " was gathered on " .. data.year .. "-" ..
             data.month .. "-" .. data.day)
     engine.hz(map(data.cycle, preindustrial, threshold, C0, C4))
+    local volts = map(data.cycle, preindustrial, threshold, 0, 10)
+    for i = 1, 4 do crow.output[i].volts = volts end
     engine.amp(0.5)
 end
 
@@ -81,10 +110,4 @@ end
 function cleanup() engine.amp(0) end
 
 -- TODO
--- Display is just the ppm number in big - white on black
--- then smaller underneath, it has the latest data timestamp
--- 
--- It should output a constant tone based on the ratio of C0 to C4.
--- It should also output a control voltage from 0-10V to a connected crow
--- 
 -- That's it I think?
