@@ -6,16 +6,18 @@
 -- reflects the concentration
 -- of CO2 in the atmosphere.
 --
--- there are no onboard controls. 
--- to change the output, change 
+-- there are no controls. To
+-- change the output, change 
 -- your habits and elect 
 -- politicians who support 
 -- strong and immediate climate 
 -- action.
 --
+-- C0 represents pre-industrial
+-- levels of co2 in the atmosphere.
 -- when the tone reaches C4, 
 -- we will have likely reached
--- 1.5C of warming, the threshold 
+-- 1.5c of warming, the threshold 
 -- for severe climate impacts on 
 -- people, wildlife and ecosystems.
 --
@@ -23,19 +25,20 @@
 -- get a cv output in the 0-10v 
 -- range on all four channels.
 --
---
+engine.name = "TestSine"
 local json = include("lib/json")
 -- https://github.com/rxi/json.lua
 
+-- Constants
 local preindustrial = 278
 local threshold = 507
 local C0 = 16.35
 local C4 = 261.63
 local api = "https://global-warming.org/api/co2-api"
 local backup = "data.json"
+local data
 
-engine.name = "TestSine"
-
+-- On startup
 function init()
     engine.amp(0)
     local dl = util.os_capture("curl -s -m 30 -k " .. api)
@@ -51,6 +54,7 @@ function init()
     process(dl)
 end
 
+-- Visuals
 function redraw()
     -- clear the screen
     screen.clear()
@@ -58,18 +62,18 @@ function redraw()
     -- text
     screen.aa(1)
 
-    -- root note
-    screen.font_size(65)
+    -- ppm
+    screen.font_size(35)
     screen.font_face(19)
-    screen.level(2)
+    screen.level(11)
 
-    screen.move(2, 56)
-    screen.text(data.cycle .. " ppm")
+    screen.move(0, 38)
+    screen.text(string.format("%.0f", data.cycle) .. "ppm")
 
-    -- scale
+    -- date
     screen.font_size(10)
     screen.font_face(4)
-    screen.level(15)
+    screen.level(4)
 
     screen.move(124, 60)
     screen.text_right(data.year .. "-" .. data.month .. "-" .. data.day)
@@ -80,7 +84,7 @@ end
 
 -- Function to run after data is downloaded
 function process(download)
-    local data = json.decode(download).co2[#json.decode(download).co2]
+    data = json.decode(download).co2[#json.decode(download).co2]
     print(
         "The data " .. data.cycle .. " was gathered on " .. data.year .. "-" ..
             data.month .. "-" .. data.day)
@@ -88,6 +92,7 @@ function process(download)
     local volts = map(data.cycle, preindustrial, threshold, 0, 10)
     for i = 1, 4 do crow.output[i].volts = volts end
     engine.amp(0.5)
+    redraw()
 end
 
 -- Function to map values from one range to another
@@ -108,6 +113,3 @@ end
 
 -- Runs when script is stopped
 function cleanup() engine.amp(0) end
-
--- TODO
--- That's it I think?
