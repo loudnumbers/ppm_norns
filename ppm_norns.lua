@@ -13,20 +13,20 @@
 -- strong and immediate climate 
 -- action.
 --
--- C0 represents pre-industrial
--- levels of co2 in the atmosphere.
 -- when the tone reaches C4, 
 -- we will have likely reached
 -- 1.5c of warming, the threshold 
 -- for severe climate impacts on 
--- people, wildlife and ecosystems.
+-- people, wildlife and
+-- ecosystems.
 --
--- you can also plug in a crow to 
--- get a cv output in the 0-10v 
--- range on all four channels.
+-- you can also plug in a crow  
+-- to get a cv output in the  
+-- 0-10v range on all four
+-- channels.
 --
 engine.name = "TestSine"
-local graph = include("lib/lightergraph")
+local Graph = include("lib/lightergraph")
 local json = include("lib/json")
 -- https://github.com/rxi/json.lua
 
@@ -41,7 +41,6 @@ local backup = "data.json"
 -- Variables
 local data
 local dataset = {}
-local graph
 
 -- On startup
 function init()
@@ -64,11 +63,10 @@ function redraw()
     -- clear the screen
     screen.clear()
 
-    -- graph
-    graph.redraw()
-
-    -- text
+    -- drawing time
     screen.aa(1)
+    screen.level(2)
+    chart:redraw()
 
     -- ppm
     screen.font_size(35)
@@ -93,21 +91,24 @@ end
 -- Function to run after data is downloaded
 function process(download)
 
+    print("processing")
+
+    local everything = json.decode(download).co2
+
     -- Fill out the dataset
-    for i = 1, #json.decode(download).co2 do
-        table.insert(dataset, json.decode(download).co2[i].cycle)
+    for i = 1, #everything do
+        table.insert(dataset, tonumber(everything[i].cycle))
     end
 
-    print(dataset)
-
     -- Make the graph
-    graph.new(1, #dataset, "lin", preindustrial, threshold, "lin",
-              "line_and_point", false, false)
-    graph:set_position_and_size(8, 22, 49, 36)
-    for i = 1, #dataset do graph:add_point(i, dataset[i]) end
+    screen.level(3)
+    chart = Graph.new(1, #dataset, "lin", preindustrial, threshold, "lin",
+                      "spline", false, false)
+    chart:set_position_and_size(0, 0, 128, 64)
+    for i = 1, #dataset do chart:add_point(i, dataset[i]) end
 
     -- Latest datapoint
-    data = json.decode(download).co2[#json.decode(download).co2]
+    data = everything[#everything]
     print(
         "The data " .. data.cycle .. " was gathered on " .. data.year .. "-" ..
             data.month .. "-" .. data.day)
