@@ -2,31 +2,89 @@
 -- v1.00 @duncangeere
 -- https://llllllll.co/t/XXXX
 --
--- a single tone that reflects the 
--- concentration of CO2 in the atmosphere.
+-- a single sine tone that 
+-- reflects the concentration
+-- of CO2 in the atmosphere.
 --
--- when it reaches C4, we will have likely
--- reached 1.5C of warming, the threshold 
--- for severe climate impacts on people,
--- wildlife and ecosystems.
+-- there are no onboard controls. 
+-- to change the output, change 
+-- your habits and elect 
+-- politicians who support 
+-- strong and immediate climate 
+-- action.
 --
--- you can also plug in a crow to get a cv
--- output in the 0-10v range.
+-- when the tone reaches C4, 
+-- we will have likely reached
+-- 1.5C of warming, the threshold 
+-- for severe climate impacts on 
+-- people, wildlife and ecosystems.
 --
--- to change the output, change your habits
--- and elect politicians who support strong
--- and immediate climate action.
+-- you can also plug in a crow to 
+-- get a cv output in the 0-10v 
+-- range on all four channels.
 --
-local musicutil = require("musicutil")
-
+--
 local json = include("lib/json")
 -- https://github.com/rxi/json.lua
 
+local preindustrial = 278
 local threshold = 507
+local C0 = 16.35
+local C4 = 261.63
 local api = "https://global-warming.org/api/co2-api"
+local backup = "data.json"
 
-local dl = util.os_capture("curl -m 30 -k " .. api)
+engine.name = "TestSine"
 
-process(dl)
+function init()
+    engine.amp(0)
+    local dl = util.os_capture("curl -s -m 30 -k " .. api)
+    if (#dl > 0) then
+        local File = io.open(_path.code .. "ppm_norns/" .. backup, 'w')
+        File:write(dl)
+        print("New backup saved")
+        File:close()
+    else
+        io.input(_path.code .. "ppm_norns/" .. backup)
+        dl = io.read("*all")
+    end
+    process(dl)
+end
 
-function process(download) print(json.decode(download)) end
+-- Function to run after data is downloaded
+function process(download)
+    local data = json.decode(download).co2[#json.decode(download).co2]
+    print(
+        "The data " .. data.cycle .. " was gathered on " .. data.year .. "-" ..
+            data.month .. "-" .. data.day)
+    engine.hz(map(data.cycle, preindustrial, threshold, C0, C4))
+    engine.amp(0.5)
+end
+
+-- Function to map values from one range to another
+function map(n, start, stop, newStart, newStop, withinBounds)
+    local value = ((n - start) / (stop - start)) * (newStop - newStart) +
+                      newStart
+
+    -- // Returns basic value
+    if not withinBounds then return value end
+
+    -- // Returns values constrained to exact range
+    if newStart < newStop then
+        return math.max(math.min(value, newStop), newStart)
+    else
+        return math.max(math.min(value, newStart), newStop)
+    end
+end
+
+-- Runs when script is stopped
+function cleanup() engine.amp(0) end
+
+-- TODO
+-- Display is just the ppm number in big - white on black
+-- then smaller underneath, it has the latest data timestamp
+-- 
+-- It should output a constant tone based on the ratio of C0 to C4.
+-- It should also output a control voltage from 0-10V to a connected crow
+-- 
+-- That's it I think?
