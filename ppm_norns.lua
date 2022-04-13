@@ -6,8 +6,9 @@
 -- reflects the concentration
 -- of CO2 in the atmosphere.
 --
--- there are no controls. To
--- change the output, change 
+-- there are no controls. 
+-- 
+-- to change the output, change 
 -- your habits and elect 
 -- politicians who support 
 -- strong and immediate climate 
@@ -20,10 +21,9 @@
 -- people, wildlife and
 -- ecosystems.
 --
--- you can also plug in a crow  
--- to get a cv output in the  
--- 0-10v range on all four
--- channels.
+-- you can also plug in crow to 
+-- get a cv output in the 0-10v 
+-- range on all four channels.
 --
 engine.name = "TestSine"
 local Graph = include("lib/lightergraph")
@@ -65,7 +65,6 @@ function redraw()
 
     -- drawing time
     screen.aa(1)
-    screen.level(2)
     chart:redraw()
 
     -- ppm
@@ -77,7 +76,7 @@ function redraw()
     screen.text(string.format("%.0f", data.cycle) .. "ppm")
 
     -- date
-    screen.font_size(10)
+    screen.font_size(8)
     screen.font_face(4)
     screen.level(4)
 
@@ -90,8 +89,6 @@ end
 
 -- Function to run after data is downloaded
 function process(download)
-
-    print("processing")
 
     local everything = json.decode(download).co2
 
