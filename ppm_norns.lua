@@ -21,9 +21,17 @@
 -- people, wildlife and
 -- ecosystems.
 --
--- you can also plug in crow to 
--- get a cv output in the 0-10v 
--- range on all four channels.
+-- suggestions:
+--
+-- - tune your oscillators to the 
+--   health of the planet
+--
+-- - plug in crow to get cv in
+--   the 0-10v range on all four 
+--   output channels
+--
+-- - use it to start conversations 
+--   about climate with friends
 --
 engine.name = "TestSine"
 local Graph = include("lib/lightergraph")

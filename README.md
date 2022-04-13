@@ -8,4 +8,8 @@ to change the output, change your habits and elect politicians who support stron
 
 when the tone reaches C4, we will have likely reached 1.5c of warming, the threshold for severe climate impacts on people, wildlife and ecosystems.
 
-you can also plug in crow to get a cv output in the 0-10v range on all four channels.
+suggestions:
+
+- tune your oscillators to the health of the planet
+- plug in crow to get a cv output in the 0-10v range on all four channels
+- use it as a way to start conversations about climate with music friends
