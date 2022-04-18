@@ -49,17 +49,23 @@ local backup = "data.json"
 -- Variables
 local data
 local dataset = {}
+local areweloaded = false
 
 -- On startup
 function init()
+
+    redraw()
+
     engine.amp(0)
     local dl = util.os_capture("curl -s -m 30 -k " .. api)
     if (#dl > 0) then
+        print("API successfully reached")
         local File = io.open(_path.code .. "ppm_norns/" .. backup, 'w')
         File:write(dl)
         print("New backup saved")
         File:close()
     else
+        print("Failed to access API, using backup instead.")
         io.input(_path.code .. "ppm_norns/" .. backup)
         dl = io.read("*all")
     end
@@ -71,25 +77,36 @@ function redraw()
     -- clear the screen
     screen.clear()
 
-    -- drawing time
-    screen.aa(1)
-    chart:redraw()
+    if (areweloaded == true) then
 
-    -- ppm
-    screen.font_size(35)
-    screen.font_face(19)
-    screen.level(11)
+        -- drawing time
+        screen.aa(1)
+        chart:redraw()
 
-    screen.move(0, 38)
-    screen.text(string.format("%.0f", data.cycle) .. "ppm")
+        -- ppm
+        screen.font_size(35)
+        screen.font_face(19)
+        screen.level(11)
 
-    -- date
-    screen.font_size(8)
-    screen.font_face(4)
-    screen.level(4)
+        screen.move(0, 38)
+        screen.text(string.format("%.0f", data.cycle) .. "ppm")
 
-    screen.move(124, 60)
-    screen.text_right(data.year .. "-" .. data.month .. "-" .. data.day)
+        -- date
+        screen.font_size(8)
+        screen.font_face(4)
+        screen.level(4)
+
+        screen.move(124, 60)
+        screen.text_right(data.year .. "-" .. data.month .. "-" .. data.day)
+
+    else
+        screen.aa(1)
+        screen.font_size(8)
+        screen.font_face(4)
+        screen.level(4)
+        screen.move(64, 32)
+        screen.text_center("please wait - loading...")
+    end
 
     -- trigger a screen update
     screen.update()
@@ -123,6 +140,14 @@ function process(download)
     local volts = map(data.cycle, preindustrial, threshold, 0, 10)
     for i = 1, 4 do crow.output[i].volts = volts end
     engine.amp(0.5)
+
+    areweloaded = true
+
+    clock.run(redraw_clock)
+end
+
+function redraw_clock()
+    clock.sleep(1)
     redraw()
 end
 
