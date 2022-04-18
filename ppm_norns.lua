@@ -101,9 +101,9 @@ function redraw()
 
     else
         screen.aa(1)
-        screen.font_size(8)
-        screen.font_face(4)
-        screen.level(4)
+        screen.font_size(10)
+        screen.font_face(1)
+        screen.level(15)
         screen.move(64, 32)
         screen.text_center("please wait - loading...")
     end
@@ -141,13 +141,12 @@ function process(download)
     for i = 1, 4 do crow.output[i].volts = volts end
     engine.amp(0.5)
 
-    areweloaded = true
-
     clock.run(redraw_clock)
 end
 
 function redraw_clock()
-    clock.sleep(1)
+    clock.sleep(0.5)
+    areweloaded = true
     redraw()
 end
 
