@@ -88,7 +88,7 @@ function redraw()
 
     else
         screen.aa(1)
-        screen.font_size(10)
+        screen.font_size(8)
         screen.font_face(1)
         screen.level(15)
         screen.move(64, 32)
