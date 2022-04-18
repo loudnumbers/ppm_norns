@@ -47,29 +47,16 @@ local api = "https://global-warming.org/api/co2-api"
 local backup = "data.json"
 
 -- Variables
+local dl
 local data
 local dataset = {}
 local areweloaded = false
 
 -- On startup
 function init()
-
     redraw()
-
     engine.amp(0)
-    local dl = util.os_capture("curl -s -m 30 -k " .. api)
-    if (#dl > 0) then
-        print("API successfully reached")
-        local File = io.open(_path.code .. "ppm_norns/" .. backup, 'w')
-        File:write(dl)
-        print("New backup saved")
-        File:close()
-    else
-        print("Failed to access API, using backup instead.")
-        io.input(_path.code .. "ppm_norns/" .. backup)
-        dl = io.read("*all")
-    end
-    process(dl)
+    clock.run(grabdata_clock)
 end
 
 -- Visuals
@@ -140,12 +127,23 @@ function process(download)
     local volts = map(data.cycle, preindustrial, threshold, 0, 10)
     for i = 1, 4 do crow.output[i].volts = volts end
     engine.amp(0.5)
-
-    clock.run(redraw_clock)
 end
 
-function redraw_clock()
+function grabdata_clock()
     clock.sleep(0.5)
+    dl = util.os_capture("curl -s -m 30 -k " .. api)
+    if (#dl > 0) then
+        print("API successfully reached")
+        local File = io.open(_path.code .. "ppm_norns/" .. backup, 'w')
+        File:write(dl)
+        print("New backup saved")
+        File:close()
+    else
+        print("Failed to access API, using backup instead.")
+        io.input(_path.code .. "ppm_norns/" .. backup)
+        dl = io.read("*all")
+    end
+    process(dl)
     areweloaded = true
     redraw()
 end
