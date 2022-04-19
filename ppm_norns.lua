@@ -132,7 +132,7 @@ end
 function grabdata_clock()
     clock.sleep(0.5)
     dl = util.os_capture("curl -s -m 30 -k " .. api)
-    if (#dl > 0) then
+    if (#dl > 75) then
         print("API successfully reached")
         local File = io.open(_path.code .. "ppm_norns/" .. backup, 'w')
         File:write(dl)
